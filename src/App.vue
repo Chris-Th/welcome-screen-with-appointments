@@ -18,13 +18,13 @@
           </h1>
         </div>
       </div>
-      <ul v-if="entries" class="entries-list" >
-        <li  v-for="entry in entries" :key="entry.id">
+      <ul v-if="entries && entries.length" class="entries-list" >
+        <li  class="entry-item" v-for="entry in entries" :key="entry.id">
           <div class="row pb-4 pt-2">
           
             <div class="col-sm-12">
               <div class="entry-item">
-                <p class="item item-time">{{ entry[1] }} {{ entry[0] }} Uhr</p>
+                <p class="item item-time">{{ entry[0] }} Uhr, {{ entry[1].replaceAll("/", ".") }} </p>
                 <p class="item item-title">{{ entry[2] }}</p>
                 <p class="item item-description">{{ entry[3] }}</p>
               </div>
@@ -56,25 +56,44 @@
 
 <script>
 // import HelloWorld from './components/HelloWorld.vue'
-
 // import { time } from 'console';
+
+import axios from "axios"; // axios is a library for making HTTP requests to the backend
 
 export default {
   name: 'App',
   data() {
-    return {
-      title:"Welcome to Opportunity",
-      currentDate: "2.3.2023",
-      entries: []
-    };
+	return {
+    title: "Welcome to Opportunity",
+    sheet_id: "1CR1UKN0LAPNs6lWbfA2gBI2FazmWdVSFIzIwi5TG5Z4",
+    api_token: "AIzaSyA-qeDXOhEeQDA0vQf7LgkF7DQtGnAtmAU",
+    entries: [],
+    currentDate: "",
+  };
+},
+
+ 
+
+  computed: {
+    gsheet_url() {
+  return `https://sheets.googleapis.com/v4/spreadsheets/${this.sheet_id}/values:batchGet?ranges=A2%3AE100&valueRenderOption=FORMATTED_VALUE&key=${this.api_token}`;
   },
+},
+
+
   methods: {
-    getData() {
+  /*  getData() {
       this.entries = [ 
         // time, date, title, description
-        ["8:25", "11/11/1111", "Feier", "failure"],
+        ["8.25", "11/11/1111", "Feier", "failure"],
         ["17.25", "22/22/2222", "wedding", "of a paper clip"]
       ] 
+    },*/
+
+    getData() {
+      axios.get(this.gsheet_url).then((response) => {
+        this.entries = response.data.valueRanges[0].values;
+      });
     },
 
     
@@ -92,7 +111,7 @@ export default {
   },
   mounted() {
     this.refreshData(); // get first initial data then wait for the next
-    setInterval(this.refreshData, 60000); // wait 1 min for next update
+    setInterval(this.refreshData, 18000000); // wait 1 min for next update
   },
 };
 
